@@ -48,20 +48,37 @@ paths:
         4. Topic flag types
 
         and many other properties related to how the Discourse site is set up
-      
+
       security:
         - api_username: []
         - api_key: []
-      
+
       responses:
         200:
           description: Successful response
           schema:
             $ref: '#/definitions/Site'
 
+  /categories.json:
+    get:
+      operationId: getCategories
+      description: |
+        Gets detailed information about all categories available to the user making the request
+
+      security:
+        - api_username: []
+        - api_key: []
+
+      responses:
+        200:
+          description: Successful response
+          schema:
+            $ref: '#/definitions/Categories'
+
 #Definitions of types used in the REST calls (parameters and responses)
 definitions:
-  #The response for /site.json
+
+  #Serialized by site_serializer.rb
   Site:
     properties:
 
@@ -69,15 +86,7 @@ definitions:
         description: Describes the available post archetypes
         type: array
         items:
-          properties:
-            id:
-              type: string
-            name:
-              type: string
-            options:
-              type: array
-              items:
-                type: string
+          $ref: '#/definitions/Archetype'
 
       default_archetype:
         description: The post archetype used by default
@@ -86,46 +95,7 @@ definitions:
       categories:
         type: array
         items:
-          type: object
-          properties:
-            id:
-              type: integer
-            name:
-              type: string
-            color:
-              type: string
-            text_color:
-              type: string
-            slug:
-              type: string
-            topic_count:
-              type: integer
-            post_count:
-              type: integer
-            position:
-              type: integer
-            description:
-              type: string
-            description_text:
-              type: string
-            topic_url:
-              type: string
-            logo_url:
-              type: string
-            background_url:
-              type: string
-            read_restricted:
-              type: boolean
-            permission:
-              type: integer
-            notification_level:
-              type: integer
-            can_edit:
-              type: boolean
-            topic_template:
-              type: string
-            has_children:
-              type: boolean        
+          $ref: '#/definitions/CategoryBasics'
 
       uncategorized_category_id:
         description: The category ID used for uncategorized posts
@@ -198,47 +168,14 @@ definitions:
         description: Lists the actions users can apply to posts (like, bookmark, off_topic etc.)
         type: array
         items:
-          type: object
-          properties:
-            name_key:
-              type: string
-            name:
-              type: string
-            description:
-              type: string
-            long_form:
-              type: string
-            is_flag:
-              type: boolean
-            icon:
-              type: string
-            id:
-              type: integer
-            is_custom_flag:
-              type: boolean
+          $ref: '#/definitions/PostActionType'
 
       topic_flag_types:
         description: Lists the flags that can be applied to topics (inappropriate, spam etc.)
         type: array
         items:
-          type: object
-          properties:
-            name_key:
-              type: string
-            name:
-              type: string
-            description:
-              type: string
-            long_form:
-              type: string
-            is_flag:
-              type: boolean
-            icon:
-              type: string
-            id:
-              type: integer
-            is_custom_flag:
-              type: boolean
+          #Shares the same type data as PostActionType
+          $ref: '#/definitions/PostActionType'
 
       trust_levels:
         type: array
@@ -253,29 +190,173 @@ definitions:
       user_fields:
         type: array
         items:
-          type: object
-          properties:
-            id:
-              type: integer
-            name:
-              type: string
-            description:
-              type: string
-            field_type:
-              type: string
-            editable:
-              type: boolean
-            required:
-              type: boolean
-            show_on_profile:
-              type: boolean
-            position:
-              type: integer
-            options:
-              description: Only available when 'field_type' is 'dropdown'
-              type: array
-              items:
-                type: string
+          $ref: '#/definitions/UserField'
+
 
       user_field_max_length:
         type: integer
+
+  #Serialized by archetype_serializer.rb
+  Archetype:
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+      options:
+        type: array
+        items:
+          type: string
+  #Serialized by basic_category_serializer.rb
+  CategoryBasics:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+      color:
+        type: string
+      text_color:
+        type: string
+      slug:
+        type: string
+      topic_count:
+        type: integer
+      post_count:
+        type: integer
+      position:
+        type: integer
+      description:
+        type: string
+      description_text:
+        type: string
+      topic_url:
+        type: string
+      logo_url:
+        type: string
+      background_url:
+        type: string
+      read_restricted:
+        type: boolean
+      permission:
+        type: integer
+      notification_level:
+        type: integer
+      can_edit:
+        type: boolean
+      topic_template:
+        type: string
+      has_children:
+        type: boolean
+
+  #Serialized by category_detailed_serializer.rb
+  CategoryDetailed:
+    allOf:
+      - $ref: '#/definitions/CategoryBasics'
+      - type: object
+        properties:
+          topics_day:
+            type: integer
+          topics_week:
+            type: integer
+          topics_month:
+            type: integer
+          topics_year:
+            type: integer
+          posts_day:
+            type: integer
+          posts_week:
+            type: integer
+          posts_month:
+            type: integer
+          posts_year:
+            type: integer
+          description_excerpt:
+            type: string
+          featured_user_ids:
+            type: array
+            items:
+              type: integer
+
+  #Serialized by post_action_type_serializer.rb
+  #Also extended without any additional data by topic_flag_type_serializer.rb
+  PostActionType:
+    properties:
+      name_key:
+        type: string
+      name:
+        type: string
+      description:
+        type: string
+      long_form:
+        type: string
+      is_flag:
+        type: boolean
+      icon:
+        type: string
+      id:
+        type: integer
+      is_custom_flag:
+        type: boolean
+
+  #Serialized by user_field_serializer.rb
+  UserField:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+      description:
+        type: string
+      field_type:
+        type: string
+      editable:
+        type: boolean
+      required:
+        type: boolean
+      show_on_profile:
+        type: boolean
+      position:
+        type: integer
+      options:
+        description: Only available when 'field_type' is 'dropdown'
+        type: array
+        items:
+          type: string
+
+  #Serialized by category_list_serializer.rb
+  CategoryList:
+    properties:
+      can_create_category:
+        type: boolean
+      can_create_topic:
+        type: boolean
+      draft:
+        type: string
+      draft_key:
+        type: string
+      draft_sequence:
+        type: integer
+      categories:
+        type: array
+        items:
+          $ref: '#/definitions/CategoryDetailed'
+
+  #Serialized by basic_user_serializer.rb
+  UserBasics:
+    properties:
+      id:
+        type: integer
+      username:
+        type: string
+      avatar_template:
+        type: string
+
+  Categories:
+    properties:
+      featured_users:
+        type: array
+        items:
+          $ref: '#/definitions/UserBasics'
+      category_list:
+        $ref: '#/definitions/CategoryList'
