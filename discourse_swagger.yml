@@ -1,0 +1,255 @@
+swagger: '2.0'
+
+#Basic information
+info:
+  version: 1.5.0-beta14
+  title: Discourse REST API Specificatiom
+  description: This specification describes the [Discourse](http://discourse.org) REST API and can be used to generate clients using the [Swagger](http://swagger.io) toolset.
+
+
+#Meta types for API
+produces:
+  - application/json
+consumes:
+  - application/json
+
+
+#Defines available security objects
+securityDefinitions:
+  api_username:
+    name: api_username
+    type: apiKey
+    in: query
+    description: Username of user making request
+  api_key:
+    name: api_key
+    type: apiKey
+    in: query
+    description: Generated API key. Must be generated for the username passed as `api_username`
+
+#Defines default security objects for operations
+security:
+  - api_username: []
+  - api_key: []
+
+
+#List of operations available for the Discourse REST API
+paths:
+
+  #Request site information
+  /site.json:
+    get:
+      operationId: getSiteInformation
+      description: |
+        Gets site information, including
+        1. Categories
+        2. Groups
+        3. Post action types
+        4. Topic flag types
+        
+        and many other properties related to how the Discourse site is set up
+      responses:
+        200:
+          description: Successful response
+          schema:
+            $ref: '#/definitions/SiteResponse'
+
+#Definitions of types used in the REST calls (parameters and responses)
+definitions:
+  #The response for /site.json
+  SiteResponse:
+    properties: 
+      default_archetype: 
+        type: string
+      notification_types: 
+        type: object
+        properties: 
+          mentioned: 
+            type: integer
+          replied: 
+            type: integer
+          quoted: 
+            type: integer
+          edited: 
+            type: integer
+          liked: 
+            type: integer
+          private_message: 
+            type: integer
+          invited_to_private_message: 
+            type: integer
+          invitee_accepted: 
+            type: integer
+          posted: 
+            type: integer
+          moved_post: 
+            type: integer
+          linked: 
+            type: integer
+          granted_badge: 
+            type: integer
+          invited_to_topic: 
+            type: integer
+          custom: 
+            type: integer
+          group_mentioned: 
+            type: integer
+          group_message_summary: 
+            type: integer
+      post_types: 
+        type: object
+        properties: 
+          regular: 
+            type: integer
+          moderator_action: 
+            type: integer
+          small_action: 
+            type: integer
+          whisper: 
+            type: integer
+      groups: 
+        type: array
+        items: 
+          type: object
+          properties: 
+            id: 
+              type: integer
+            name: 
+              type: string
+      filters: 
+        type: array
+        items: 
+          type: string
+      periods: 
+        type: array
+        items: 
+          type: string
+      top_menu_items: 
+        type: array
+        items: 
+          type: string
+      anonymous_top_menu_items: 
+        type: array
+        items: 
+          type: string
+      uncategorized_category_id: 
+        type: integer
+      is_readonly: 
+        type: boolean
+      disabled_plugins: 
+        type: array
+        items: {}
+      user_field_max_length: 
+        type: integer
+      suppressed_from_homepage_category_ids: 
+        type: array
+        items: {}
+      post_action_types: 
+        type: array
+        items: 
+          type: object
+          properties: 
+            name_key: 
+              type: string
+            name: 
+              type: string
+            description: 
+              type: string
+            long_form: 
+              type: string
+            is_flag: 
+              type: boolean
+            icon: 
+              type: string
+            id: 
+              type: integer
+            is_custom_flag: 
+              type: boolean
+      topic_flag_types: 
+        type: array
+        items: 
+          type: object
+          properties: 
+            name_key: 
+              type: string
+            name: 
+              type: string
+            description: 
+              type: string
+            long_form: 
+              type: string
+            is_flag: 
+              type: boolean
+            icon: 
+              type: string
+            id: 
+              type: integer
+            is_custom_flag: 
+              type: boolean
+      categories: 
+        type: array
+        items: 
+          type: object
+          properties: 
+            id: 
+              type: integer
+            name: 
+              type: string
+            color: 
+              type: string
+            text_color: 
+              type: string
+            slug: 
+              type: string
+            topic_count: 
+              type: integer
+            post_count: 
+              type: integer
+            position: 
+              type: integer
+            description: 
+              type: string
+            description_text: 
+              type: string
+            topic_url: 
+              type: string
+            logo_url: 
+              type: string
+            background_url: 
+              type: string
+            read_restricted: 
+              type: boolean
+            permission: 
+              type: integer
+            notification_level: 
+              type: integer
+            can_edit: 
+              type: boolean
+            topic_template: 
+              type: string
+            has_children: 
+              type: boolean
+      trust_levels: 
+        type: array
+        items: 
+          type: object
+          properties: 
+            id: 
+              type: integer
+            name: 
+              type: string
+      archetypes: 
+        type: array
+        items: 
+          type: object
+          properties: 
+            id: 
+              type: string
+            name: 
+              type: string
+            options: 
+              type: array
+              items: {}
+      user_fields: 
+        type: array
+        items: {}
