@@ -25,7 +25,7 @@ securityDefinitions:
     name: api_key
     type: apiKey
     in: query
-    description: Generated API key. Must be generated for the username passed as `api_username`
+    description: Generated API key. Must have been generated for the username passed as `api_username`
 
 #Defines default security objects for operations
 security:
@@ -46,210 +46,236 @@ paths:
         2. Groups
         3. Post action types
         4. Topic flag types
-        
+
         and many other properties related to how the Discourse site is set up
+      
+      security:
+        - api_username: []
+        - api_key: []
+      
       responses:
         200:
           description: Successful response
           schema:
-            $ref: '#/definitions/SiteResponse'
+            $ref: '#/definitions/Site'
 
 #Definitions of types used in the REST calls (parameters and responses)
 definitions:
   #The response for /site.json
-  SiteResponse:
-    properties: 
-      default_archetype: 
-        type: string
-      notification_types: 
-        type: object
-        properties: 
-          mentioned: 
-            type: integer
-          replied: 
-            type: integer
-          quoted: 
-            type: integer
-          edited: 
-            type: integer
-          liked: 
-            type: integer
-          private_message: 
-            type: integer
-          invited_to_private_message: 
-            type: integer
-          invitee_accepted: 
-            type: integer
-          posted: 
-            type: integer
-          moved_post: 
-            type: integer
-          linked: 
-            type: integer
-          granted_badge: 
-            type: integer
-          invited_to_topic: 
-            type: integer
-          custom: 
-            type: integer
-          group_mentioned: 
-            type: integer
-          group_message_summary: 
-            type: integer
-      post_types: 
-        type: object
-        properties: 
-          regular: 
-            type: integer
-          moderator_action: 
-            type: integer
-          small_action: 
-            type: integer
-          whisper: 
-            type: integer
-      groups: 
+  Site:
+    properties:
+
+      archetypes:
+        description: Describes the available post archetypes
         type: array
-        items: 
-          type: object
-          properties: 
-            id: 
-              type: integer
-            name: 
+        items:
+          properties:
+            id:
               type: string
-      filters: 
-        type: array
-        items: 
-          type: string
-      periods: 
-        type: array
-        items: 
-          type: string
-      top_menu_items: 
-        type: array
-        items: 
-          type: string
-      anonymous_top_menu_items: 
-        type: array
-        items: 
-          type: string
-      uncategorized_category_id: 
-        type: integer
-      is_readonly: 
-        type: boolean
-      disabled_plugins: 
-        type: array
-        items: {}
-      user_field_max_length: 
-        type: integer
-      suppressed_from_homepage_category_ids: 
-        type: array
-        items: {}
-      post_action_types: 
-        type: array
-        items: 
-          type: object
-          properties: 
-            name_key: 
+            name:
               type: string
-            name: 
-              type: string
-            description: 
-              type: string
-            long_form: 
-              type: string
-            is_flag: 
-              type: boolean
-            icon: 
-              type: string
-            id: 
-              type: integer
-            is_custom_flag: 
-              type: boolean
-      topic_flag_types: 
-        type: array
-        items: 
-          type: object
-          properties: 
-            name_key: 
-              type: string
-            name: 
-              type: string
-            description: 
-              type: string
-            long_form: 
-              type: string
-            is_flag: 
-              type: boolean
-            icon: 
-              type: string
-            id: 
-              type: integer
-            is_custom_flag: 
-              type: boolean
-      categories: 
-        type: array
-        items: 
-          type: object
-          properties: 
-            id: 
-              type: integer
-            name: 
-              type: string
-            color: 
-              type: string
-            text_color: 
-              type: string
-            slug: 
-              type: string
-            topic_count: 
-              type: integer
-            post_count: 
-              type: integer
-            position: 
-              type: integer
-            description: 
-              type: string
-            description_text: 
-              type: string
-            topic_url: 
-              type: string
-            logo_url: 
-              type: string
-            background_url: 
-              type: string
-            read_restricted: 
-              type: boolean
-            permission: 
-              type: integer
-            notification_level: 
-              type: integer
-            can_edit: 
-              type: boolean
-            topic_template: 
-              type: string
-            has_children: 
-              type: boolean
-      trust_levels: 
-        type: array
-        items: 
-          type: object
-          properties: 
-            id: 
-              type: integer
-            name: 
-              type: string
-      archetypes: 
-        type: array
-        items: 
-          type: object
-          properties: 
-            id: 
-              type: string
-            name: 
-              type: string
-            options: 
+            options:
               type: array
-              items: {}
-      user_fields: 
+              items:
+                type: string
+
+      default_archetype:
+        description: The post archetype used by default
+        type: string
+
+      categories:
         type: array
-        items: {}
+        items:
+          type: object
+          properties:
+            id:
+              type: integer
+            name:
+              type: string
+            color:
+              type: string
+            text_color:
+              type: string
+            slug:
+              type: string
+            topic_count:
+              type: integer
+            post_count:
+              type: integer
+            position:
+              type: integer
+            description:
+              type: string
+            description_text:
+              type: string
+            topic_url:
+              type: string
+            logo_url:
+              type: string
+            background_url:
+              type: string
+            read_restricted:
+              type: boolean
+            permission:
+              type: integer
+            notification_level:
+              type: integer
+            can_edit:
+              type: boolean
+            topic_template:
+              type: string
+            has_children:
+              type: boolean        
+
+      uncategorized_category_id:
+        description: The category ID used for uncategorized posts
+        type: integer
+
+      notification_types:
+        description: Map of string to integer listing the available notification types
+        type: object
+        additionalProperties:
+          type: integer
+
+      post_types:
+        description: Map of string to integer listing the available post types
+        type: object
+        additionalProperties:
+          type: integer
+
+      groups:
+        description: Lists the available groups
+        type: array
+        items:
+          type: object
+          properties:
+            id:
+              type: integer
+            name:
+              type: string
+
+      filters:
+        description: Lists the available post filters (latest, new, unread etc.)
+        type: array
+        items:
+          type: string
+
+      periods:
+        description: Lists the available time periods for filtering posts (all, yearly, daily etc.)
+        type: array
+        items:
+          type: string
+
+      top_menu_items:
+        description: Lists the menu items shown at the top of the page for logged in users
+        type: array
+        items:
+          type: string
+
+      anonymous_top_menu_items:
+        description: Lists the menu items shown at the top of the page for anonomous visitors
+        type: array
+        items:
+          type: string
+
+      is_readonly:
+        description: Indicates whether the site is in read-only mode
+        type: boolean
+
+      disabled_plugins:
+        description: Lists the plugins that are currently disabled
+        type: array
+        items:
+          type: string
+
+      suppressed_from_homepage_category_ids:
+        description: Declares which categories are suppressed from the front page
+        type: array
+        items:
+          type: integer
+
+      post_action_types:
+        description: Lists the actions users can apply to posts (like, bookmark, off_topic etc.)
+        type: array
+        items:
+          type: object
+          properties:
+            name_key:
+              type: string
+            name:
+              type: string
+            description:
+              type: string
+            long_form:
+              type: string
+            is_flag:
+              type: boolean
+            icon:
+              type: string
+            id:
+              type: integer
+            is_custom_flag:
+              type: boolean
+
+      topic_flag_types:
+        description: Lists the flags that can be applied to topics (inappropriate, spam etc.)
+        type: array
+        items:
+          type: object
+          properties:
+            name_key:
+              type: string
+            name:
+              type: string
+            description:
+              type: string
+            long_form:
+              type: string
+            is_flag:
+              type: boolean
+            icon:
+              type: string
+            id:
+              type: integer
+            is_custom_flag:
+              type: boolean
+
+      trust_levels:
+        type: array
+        items:
+          type: object
+          properties:
+            id:
+              type: integer
+            name:
+              type: string
+
+      user_fields:
+        type: array
+        items:
+          type: object
+          properties:
+            id:
+              type: integer
+            name:
+              type: string
+            description:
+              type: string
+            field_type:
+              type: string
+            editable:
+              type: boolean
+            required:
+              type: boolean
+            show_on_profile:
+              type: boolean
+            position:
+              type: integer
+            options:
+              description: Only available when 'field_type' is 'dropdown'
+              type: array
+              items:
+                type: string
+
+      user_field_max_length:
+        type: integer
