@@ -39,7 +39,7 @@ paths:
   #Request site information
   /site.json:
     get:
-      operationId: getSiteInformation
+      operationId: getSite
       description: |
         Gets site information, including
         1. Categories
@@ -73,7 +73,53 @@ paths:
         200:
           description: Successful response
           schema:
-            $ref: '#/definitions/Categories'
+            $ref: '#/definitions/CategoriesResponse'
+
+  /c/{id}.json:
+    get:
+      operationId: getCategory
+      description: |
+        Gets detailed information and topics for a specific category
+
+      parameters:
+        - name: id
+          type: string
+          description: Category slug
+          in: path
+          required: true
+
+      security:
+        - api_username: []
+        - api_key: []
+
+      responses:
+        200:
+          description: Successful response
+          schema:
+            $ref: '#/definitions/CategoryResponse'
+
+  /t/{id}.json:
+    get:
+      operationId: getTopic
+      description: |
+        Gets detailed information and posts for a specific topic
+
+      parameters:
+        - name: id
+          type: string
+          description: Topic slug
+          in: path
+          required: true
+
+      security:
+        - api_username: []
+        - api_key: []
+
+      responses:
+        200:
+          description: Successful response
+          schema:
+            $ref: '#/definitions/TopicView'
 
 #Definitions of types used in the REST calls (parameters and responses)
 definitions:
@@ -95,7 +141,7 @@ definitions:
       categories:
         type: array
         items:
-          $ref: '#/definitions/CategoryBasics'
+          $ref: '#/definitions/BasicCategory'
 
       uncategorized_category_id:
         description: The category ID used for uncategorized posts
@@ -174,8 +220,7 @@ definitions:
         description: Lists the flags that can be applied to topics (inappropriate, spam etc.)
         type: array
         items:
-          #Shares the same type data as PostActionType
-          $ref: '#/definitions/PostActionType'
+          $ref: '#/definitions/TopicFlagType'
 
       trust_levels:
         type: array
@@ -208,7 +253,7 @@ definitions:
         items:
           type: string
   #Serialized by basic_category_serializer.rb
-  CategoryBasics:
+  BasicCategory:
     properties:
       id:
         type: integer
@@ -252,7 +297,7 @@ definitions:
   #Serialized by category_detailed_serializer.rb
   CategoryDetailed:
     allOf:
-      - $ref: '#/definitions/CategoryBasics'
+      - $ref: '#/definitions/BasicCategory'
       - type: object
         properties:
           topics_day:
@@ -279,7 +324,6 @@ definitions:
               type: integer
 
   #Serialized by post_action_type_serializer.rb
-  #Also extended without any additional data by topic_flag_type_serializer.rb
   PostActionType:
     properties:
       name_key:
@@ -298,6 +342,11 @@ definitions:
         type: integer
       is_custom_flag:
         type: boolean
+
+  #Serialized by post_action_type_serializer.rb
+  TopicFlagType:
+    allOf:
+      - $ref: '#/definitions/PostActionType'
 
   #Serialized by user_field_serializer.rb
   UserField:
@@ -343,7 +392,7 @@ definitions:
           $ref: '#/definitions/CategoryDetailed'
 
   #Serialized by basic_user_serializer.rb
-  UserBasics:
+  BasicUser:
     properties:
       id:
         type: integer
@@ -352,11 +401,433 @@ definitions:
       avatar_template:
         type: string
 
-  Categories:
+  #Not sure who serializes this
+  CategoriesResponse:
     properties:
       featured_users:
         type: array
         items:
-          $ref: '#/definitions/UserBasics'
+          $ref: '#/definitions/BasicUser'
       category_list:
         $ref: '#/definitions/CategoryList'
+
+  #Not sure who serializes this
+  CategoryResponse:
+    properties:
+      users:
+        type: array
+        items:
+          $ref: '#/definitions/BasicUser'
+      topic_list:
+        $ref: '#/definitions/TopicList'
+
+  #Serialized by topic_list_serializer.rb
+  TopicList:
+      properties:
+      properties:
+        can_create_topic:
+          type:       boolean
+        draft:
+          type:       string
+        draft_key:
+          type:       string
+        draft_sequence:
+          type:       integer
+        per_page:
+          type:       integer
+        topics:
+          type:       array
+          items:
+            $ref: '#/definitions/TopicListItem'
+
+
+  #Serialized by basic_topic_serializer.rb
+  BasicTopic:
+    properties:
+      id:
+        type:       integer
+      title:
+        type:       string
+      fancy_title:
+        type:       string
+      slug:
+        type:       string
+      posts_count:
+        type:       integer
+
+
+  #Serialized by listable_topic_serializer.rb
+  ListableTopic:
+    allOf:
+      - $ref: '#/definitions/BasicTopic'
+      - type: object
+        properties:
+          reply_count:
+            type:       integer
+          highest_post_number:
+            type:       integer
+          image_url:
+            type:       string
+          created_at:
+            type:       string
+          last_posted_at:
+            type:       string
+          bumped:
+            type:       boolean
+          bumped_at:
+            type:       string
+          unseen:
+            type:       boolean
+          last_read_post_number:
+            type:       integer
+          unread:
+            type:       integer
+          new_posts:
+            type:       integer
+          pinned:
+            type:       boolean
+          unpinned:
+            type:       boolean
+          visible:
+            type:       boolean
+          closed:
+            type:       boolean
+          archived:
+            type:       boolean
+          notification_level:
+            type:       integer
+          bookmarked:
+            type:       boolean
+          liked:
+            type:       boolean
+
+  #Serialized by topic_list_item_serializer.rb
+  TopicListItem:
+    allOf:
+    - $ref: '#/definitions/ListableTopic'
+    - type: object
+      properties:
+        views:
+          type:       integer
+        like_count:
+          type:       integer
+        has_summary:
+          type:       boolean
+        archetype:
+          type:       string
+        last_poster_username:
+          type:       string
+        category_id:
+          type:       integer
+        pinned_globally:
+          type:       boolean
+        posters:
+          type:       array
+          items:
+            $ref: '#/definitions/TopicPoster'
+        participants:
+          type:       array
+          items:
+            $ref: '#/definitions/TopicPoster'
+
+
+  #Serialized by topic_poster_serializer.rb
+  TopicPoster:
+    properties:
+      extras:
+        type:       string
+      description:
+        type:       string
+      user_id:
+        type:       integer
+
+  #Serialized by topic_view_serializer.rb
+  TopicView:
+    properties:
+      post_stream:
+        $ref: '#/definitions/PostStream'
+      id:
+        type: integer
+      title:
+        type: string
+      fancy_title:
+        type: string
+      posts_count:
+        type: integer
+      created_at:
+        type: string
+      views:
+        type: integer
+      reply_count:
+        type: integer
+      participant_count:
+        type: integer
+      like_count:
+        type: integer
+      last_posted_at:
+        type: string
+      visible:
+        type: boolean
+      closed:
+        type: boolean
+      archived:
+        type: boolean
+      has_summary:
+        type: boolean
+      archetype:
+        type: string
+      slug:
+        type: string
+      category_id:
+        type: integer
+      word_count:
+        type: integer
+      deleted_at:
+        type: string
+      user_id:
+        type: integer
+      draft:
+        type: string
+      draft_key:
+        type: string
+      draft_sequence:
+        type: integer
+      posted:
+        type: boolean
+      unpinned:
+        type: boolean
+      pinned_globally:
+        type: boolean
+      pinned:
+        type: boolean
+      pinned_at:
+        type: string
+      pinned_until:
+        type: string
+
+      #There is a TODO in the source code to move this to its own serializer, but for now we'll leave it here
+      details:
+        type: object
+        properties:
+          auto_close_at:
+            type: string
+          auto_close_hours:
+            type: string
+          auto_close_based_on_last_post:
+            type: boolean
+          created_by:
+            $ref: '#/definitions/BasicUser'
+          last_poster:
+            $ref: '#/definitions/BasicUser'
+          participants:
+            type: array
+            items:
+              $ref: '#/definitions/TopicPostCount'
+          suggested_topics:
+            type: array
+            items:
+              $ref: '#/definitions/SuggestedTopic'
+          links:
+            type: array
+            items:
+              $ref: '#/definitions/TopicLink'
+          notification_level:
+            type: integer
+          notifications_reason_id:
+            type: integer
+          can_move_posts:
+            type: boolean
+          can_edit:
+            type: boolean
+          can_recover:
+            type: boolean
+          can_remove_allowed_users:
+            type: boolean
+          can_invite_to:
+            type: boolean
+          can_create_post:
+            type: boolean
+          can_reply_as_new_topic:
+            type: boolean
+          can_flag_topic:
+            type: boolean
+          #END details
+
+      highest_post_number:
+        type: integer
+      last_read_post_number:
+        type: integer
+      deleted_by:
+        type: string
+      has_deleted:
+        type: boolean
+      actions_summary:
+        type: array
+        items:
+          type: object
+          properties:
+            id:
+              type: integer
+            count:
+              type: integer
+            hidden:
+              type: boolean
+            can_act:
+              type: boolean
+      chunk_size:
+        type: integer
+      bookmarked:
+        type: boolean
+
+  #Serialized by post_stream_serializer_mixin.rb
+  PostStream:
+    properties:
+      posts:
+        type: array
+        items:
+          $ref: '#/definitions/Post'
+
+  #Serialized by basic_post_serializer.rb
+  BasicPost:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+      username:
+        type: string
+      avatar_template:
+        type: string
+      created_at:
+        type: string
+      cooked:
+        type: string
+
+  #Serialized by post_serializer.rb
+  Post:
+    allOf:
+    - $ref: '#/definitions/BasicPost'
+    - type: object
+      properties:
+        post_number:
+          type: integer
+        post_type:
+          type: integer
+        updated_at:
+          type: string
+        reply_count:
+          type: integer
+        reply_to_post_number:
+          type: integer
+        quote_count:
+          type: integer
+        avg_time:
+          type: string
+        incoming_link_count:
+          type: integer
+        reads:
+          type: integer
+        score:
+          type: number
+        yours:
+          type: boolean
+        topic_id:
+          type: integer
+        topic_slug:
+          type: string
+        display_username:
+          type: string
+        primary_group_name:
+          type: string
+        version:
+          type: integer
+        can_edit:
+          type: boolean
+        can_delete:
+          type: boolean
+        can_recover:
+          type: boolean
+        can_wiki:
+          type: boolean
+        read:
+          type: boolean
+        user_title:
+          type: string
+        actions_summary:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+              can_act:
+                type: boolean
+        moderator:
+          type: boolean
+        admin:
+          type: boolean
+        staff:
+          type: boolean
+        user_id:
+          type: integer
+        hidden:
+          type: boolean
+        hidden_reason_id:
+          type: integer
+        trust_level:
+          type: integer
+        deleted_at:
+          type: string
+        user_deleted:
+          type: boolean
+        edit_reason:
+          type: string
+        can_view_edit_history:
+          type: boolean
+        wiki:
+          type: boolean
+
+  #Serialized by suggested_topic_serializer.rb
+  SuggestedTopic:
+    allOf:
+    - $ref: '#/definitions/ListableTopic'
+    - type: object
+      properties:
+        archetype:
+          type: string
+        like_count:
+          type: integer
+        views:
+          type: integer
+        category_id:
+          type: integer
+
+
+  TopicPostCount:
+    allOf:
+      - $ref: '#/definitions/BasicUser'
+      - type: object
+        properties:
+          post_count:
+            type: integer
+
+  TopicLink:
+    properties:
+      url:
+        type: string
+      title:
+        type: string
+      fancy_title:
+        type: string
+      internal:
+        type: boolean
+      attachment:
+        type: boolean
+      reflection:
+        type: boolean
+      clicks:
+        type: integer
+      user_id:
+        type: integer
+      domain:
+        type: string
