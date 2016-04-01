@@ -21,7 +21,7 @@ Provides a Swagger specification of the Discourse REST API, that can be used to 
     //Get information about available categories
     CategoriesResponse categoriesResponse = api.getCategories();
     String slugOfThirdCategory = categoriesResponse.getCategoryList().getCategories().get(3).getSlug();
-    System.out.println("First category slug: " + slugOfThirdCategory);
+    System.out.println("Third category slug: " + slugOfThirdCategory);
     
     //Get a single category
     CategoryResponse categoryResponse = api.getCategory(slugOfThirdCategory);
